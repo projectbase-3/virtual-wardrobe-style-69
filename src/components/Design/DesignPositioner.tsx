@@ -26,14 +26,14 @@ export const DesignPositioner: React.FC<DesignPositionerProps> = ({
   const handlePositionChange = (axis: 'x' | 'y', value: number[]) => {
     onPlacementChange({
       ...placement,
-      [axis]: value[0] / 100 // Convert from 0-100 to -1 to 1
+      [axis]: value[0] / 50 // Convert from -100 to 100 slider to -2 to 2 range
     });
   };
 
   const handleScaleChange = (value: number[]) => {
     onPlacementChange({
       ...placement,
-      scale: value[0] / 100 // Convert from 0-100 to 0-2
+      scale: value[0] / 50 // Convert from 0-200 slider to 0-4 scale range
     });
   };
 
@@ -64,41 +64,50 @@ export const DesignPositioner: React.FC<DesignPositionerProps> = ({
       <CardContent className="space-y-4">
         {/* Horizontal Position */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-600">Horizontal</label>
+          <label className="text-xs font-medium text-gray-600">Horizontal Position</label>
           <Slider
-            value={[placement.x * 100]}
+            value={[placement.x * 50]}
             onValueChange={(value) => handlePositionChange('x', value)}
-            min={-50}
-            max={50}
+            min={-100}
+            max={100}
             step={1}
             className="w-full"
           />
+          <div className="text-xs text-gray-500 text-center">
+            {placement.x.toFixed(2)}
+          </div>
         </div>
 
         {/* Vertical Position */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-600">Vertical</label>
+          <label className="text-xs font-medium text-gray-600">Vertical Position</label>
           <Slider
-            value={[placement.y * 100]}
+            value={[placement.y * 50]}
             onValueChange={(value) => handlePositionChange('y', value)}
-            min={-50}
-            max={80}
+            min={-100}
+            max={100}
             step={1}
             className="w-full"
           />
+          <div className="text-xs text-gray-500 text-center">
+            {placement.y.toFixed(2)}
+          </div>
         </div>
 
         {/* Scale */}
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-600">Size</label>
           <Slider
-            value={[placement.scale * 100]}
+            value={[placement.scale * 50]}
             onValueChange={handleScaleChange}
-            min={20}
+            min={10}
             max={200}
             step={5}
             className="w-full"
           />
+          <div className="text-xs text-gray-500 text-center">
+            {(placement.scale * 100).toFixed(0)}%
+          </div>
         </div>
 
         {/* Rotation */}
@@ -112,6 +121,9 @@ export const DesignPositioner: React.FC<DesignPositionerProps> = ({
             step={1}
             className="w-full"
           />
+          <div className="text-xs text-gray-500 text-center">
+            {Math.round((placement.rotation / Math.PI) * 180)}°
+          </div>
         </div>
 
         {/* Reset Button */}

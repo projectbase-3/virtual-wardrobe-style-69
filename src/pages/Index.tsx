@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
-import { Palette, Shirt, RotateCcw, Heart, ShoppingBag, Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DesignUploader } from '@/components/Design/DesignUploader';
+import { Palette, Shirt, Heart } from 'lucide-react';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Header } from '@/components/Navigation/Header';
 import { ShirtCollection3D } from '@/components/3D/ShirtCollection3D';
 import { ShirtCustomizer } from '@/components/Customization/ShirtCustomizer';
 import { FavoriteOutfits } from '@/components/FavoriteOutfits';
@@ -25,58 +24,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <Shirt className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Custom Shirt Designer
-                </h1>
-                <p className="text-sm text-gray-600">Professional 3D Design Studio</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="w-4 h-4" />
-                Share
-              </Button>
-              <Button size="sm" className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                <ShoppingBag className="w-4 h-4" />
-                Get Quote
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header with Navigation */}
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 bg-white/60 backdrop-blur-sm">
-            <TabsTrigger value="shirts" className="gap-2">
-              <Shirt className="w-4 h-4" />
-              Select Shirt
-            </TabsTrigger>
-            <TabsTrigger value="customize" className="gap-2">
-              <Palette className="w-4 h-4" />
-              Design & Customize
-            </TabsTrigger>
-            <TabsTrigger value="favorites" className="gap-2">
-              <Heart className="w-4 h-4" />
-              Saved Designs
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="gap-2">
-              <Shirt className="w-4 h-4" />
-              Profile
-            </TabsTrigger>
-          </TabsList>
-
           <TabsContent value="shirts" className="space-y-6">
+            <div className="text-center space-y-2 mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Choose Your Shirt</h2>
+              <p className="text-lg text-gray-600">Select from our premium collection</p>
+            </div>
             <ShirtCollection3D onShirtSelect={handleShirtSelect} />
           </TabsContent>
 
@@ -88,10 +46,18 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="favorites" className="space-y-6">
+            <div className="text-center space-y-2 mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Your Saved Designs</h2>
+              <p className="text-lg text-gray-600">View and manage your favorite creations</p>
+            </div>
             <FavoriteOutfits favorites={savedDesigns} />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
+            <div className="text-center space-y-2 mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Your Profile</h2>
+              <p className="text-lg text-gray-600">Manage your account and preferences</p>
+            </div>
             <UserProfile />
           </TabsContent>
         </Tabs>

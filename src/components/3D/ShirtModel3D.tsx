@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Group } from 'three';
@@ -40,7 +39,7 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
     back: 'loading' | 'loaded' | 'error' | 'idle';
   }>({ front: 'idle', back: 'idle' });
 
-  // Load front texture with better error handling
+  // Load front texture with proper orientation
   useEffect(() => {
     console.log('Front design changed:', frontDesign);
     
@@ -58,7 +57,7 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
           texture.wrapT = THREE.ClampToEdgeWrapping;
           texture.minFilter = THREE.LinearFilter;
           texture.magFilter = THREE.LinearFilter;
-          texture.flipY = false;
+          texture.flipY = true; // Fix upside down issue
           texture.needsUpdate = true;
           setFrontTexture(texture);
           setTextureLoadingState(prev => ({ ...prev, front: 'loaded' }));
@@ -79,7 +78,7 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
     }
   }, [frontDesign]);
 
-  // Load back texture with better error handling
+  // Load back texture with proper orientation
   useEffect(() => {
     console.log('Back design changed:', backDesign);
     
@@ -97,7 +96,7 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
           texture.wrapT = THREE.ClampToEdgeWrapping;
           texture.minFilter = THREE.LinearFilter;
           texture.magFilter = THREE.LinearFilter;
-          texture.flipY = false;
+          texture.flipY = true; // Fix upside down issue
           texture.needsUpdate = true;
           setBackTexture(texture);
           setTextureLoadingState(prev => ({ ...prev, back: 'loaded' }));
@@ -124,7 +123,6 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
     }
   });
 
-  // Create realistic t-shirt shape
   const createTShirtGeometry = () => {
     const shape = new THREE.Shape();
     
@@ -169,7 +167,9 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
     showBack,
     frontDesign: !!frontDesign,
     backDesign: !!backDesign,
-    textureLoadingState
+    textureLoadingState,
+    frontPlacement,
+    backPlacement
   });
 
   return (
@@ -184,12 +184,12 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
         />
       </mesh>
       
-      {/* Front design - only show when not showing back and texture is loaded */}
+      {/* Front design - with proper scaling */}
       {frontTexture && !showBack && (
         <mesh 
           position={[frontPlacement.x, frontPlacement.y, 0.15]}
           rotation={[0, 0, frontPlacement.rotation]}
-          scale={[frontPlacement.scale * 1.2, frontPlacement.scale * 1.2, 1]}
+          scale={[frontPlacement.scale, frontPlacement.scale, 1]}
           renderOrder={1}
         >
           <planeGeometry args={[1, 1]} />
@@ -204,12 +204,12 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
         </mesh>
       )}
       
-      {/* Back design - only show when showing back and texture is loaded */}
+      {/* Back design - with proper scaling */}
       {backTexture && showBack && (
         <mesh 
           position={[-backPlacement.x, backPlacement.y, -0.15]}
           rotation={[0, Math.PI, -backPlacement.rotation]}
-          scale={[backPlacement.scale * 1.2, backPlacement.scale * 1.2, 1]}
+          scale={[backPlacement.scale, backPlacement.scale, 1]}
           renderOrder={1}
         >
           <planeGeometry args={[1, 1]} />
