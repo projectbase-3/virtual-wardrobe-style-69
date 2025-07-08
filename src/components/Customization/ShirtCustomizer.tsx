@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RotateCcw, Palette, Download, ShoppingCart, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +41,18 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
     rotation: 0
   });
 
+  // Debug effect to track state changes
+  useEffect(() => {
+    console.log('ShirtCustomizer state update:', {
+      frontDesign: frontDesign ? 'has design' : 'no design',
+      backDesign: backDesign ? 'has design' : 'no design',
+      showBack,
+      selectedColor,
+      frontDesignLength: frontDesign?.length,
+      backDesignLength: backDesign?.length
+    });
+  }, [frontDesign, backDesign, showBack, selectedColor]);
+
   if (!selectedShirt) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -70,12 +82,20 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
     });
     
     if (type === 'front') {
+      console.log('Setting front design:', design ? 'Design data received' : 'No design data');
       setFrontDesign(design);
-      console.log('Front design state updated:', design ? 'Design set' : 'Design cleared');
     } else {
+      console.log('Setting back design:', design ? 'Design data received' : 'No design data');
       setBackDesign(design);
-      console.log('Back design state updated:', design ? 'Design set' : 'Design cleared');
     }
+    
+    // Force a re-render by triggering state change
+    setTimeout(() => {
+      console.log('Post-upload state check:', {
+        frontDesign: frontDesign ? 'has design' : 'no design',
+        backDesign: backDesign ? 'has design' : 'no design'
+      });
+    }, 100);
   };
 
   const handleSaveDesign = () => {
@@ -89,16 +109,6 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
       savedAt: new Date().toISOString()
     });
   };
-
-  // Debug current state
-  console.log('ShirtCustomizer render state:', {
-    frontDesign: frontDesign ? 'has design' : 'no design',
-    backDesign: backDesign ? 'has design' : 'no design',
-    showBack,
-    selectedColor,
-    frontDesignType: typeof frontDesign,
-    backDesignType: typeof backDesign
-  });
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -139,7 +149,10 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
                   <Button
                     variant={showBack ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setShowBack(!showBack)}
+                    onClick={() => {
+                      console.log('Toggling view to:', !showBack ? 'back' : 'front');
+                      setShowBack(!showBack);
+                    }}
                     className="gap-2"
                   >
                     {showBack ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -178,7 +191,7 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-2xl font-bold text-gray-900">
-                ₹{selectedShirt.price}
+                ₹{selectedShirt.price?.toLocaleString('en-IN')}
               </div>
               
               {/* Color Selection */}
@@ -226,6 +239,14 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Debug Info */}
+              {(frontDesign || backDesign) && (
+                <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                  <p>Debug: Front {frontDesign ? '✓' : '✗'}, Back {backDesign ? '✓' : '✗'}</p>
+                  <p>View: {showBack ? 'Back' : 'Front'}</p>
                 </div>
               )}
             </CardContent>

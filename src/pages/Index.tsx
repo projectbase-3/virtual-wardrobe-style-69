@@ -103,6 +103,7 @@ const Index = () => {
           <div className="text-center text-gray-600">
             <p className="mb-2">Custom Shirt Designer - Professional 3D Design Platform</p>
             <p className="text-sm">Upload your designs and see them come to life on realistic 3D shirt models</p>
+            <p className="text-xs mt-2 text-gray-500">All prices are in Indian Rupees (₹)</p>
           </div>
         </div>
       </footer>

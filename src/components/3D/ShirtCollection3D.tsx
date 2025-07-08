@@ -25,48 +25,48 @@ const shirtModels: ShirtModel[] = [
     name: 'Classic T-Shirt',
     type: 'Crew Neck',
     colors: ['#ffffff', '#000000', '#3b82f6', '#ef4444', '#10b981'],
-    price: 19.99,
-    image: '/placeholder.svg'
+    price: 1659,
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
   },
   {
     id: '2',
     name: 'V-Neck Tee',
     type: 'V-Neck',
     colors: ['#ffffff', '#6b7280', '#8b5cf6', '#f59e0b'],
-    price: 22.99,
-    image: '/placeholder.svg'
+    price: 1909,
+    image: 'https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=400&h=400&fit=crop&auto=format'
   },
   {
     id: '3',
     name: 'Long Sleeve',
     type: 'Long Sleeve',
     colors: ['#ffffff', '#000000', '#1f2937', '#7c3aed'],
-    price: 27.99,
-    image: '/placeholder.svg'
+    price: 2324,
+    image: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=400&fit=crop&auto=format'
   },
   {
     id: '4',
     name: 'Premium Polo',
     type: 'Polo Shirt',
     colors: ['#ffffff', '#1e40af', '#059669', '#dc2626'],
-    price: 34.99,
-    image: '/placeholder.svg'
+    price: 2904,
+    image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop&auto=format'
   },
   {
     id: '5',
     name: 'Cozy Hoodie',
     type: 'Hoodie',
     colors: ['#6b7280', '#000000', '#1f2937', '#7c2d12'],
-    price: 49.99,
-    image: '/placeholder.svg'
+    price: 4154,
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop&auto=format'
   },
   {
     id: '6',
     name: 'Tank Top',
     type: 'Tank Top',
     colors: ['#ffffff', '#000000', '#f59e0b', '#ef4444'],
-    price: 16.99,
-    image: '/placeholder.svg'
+    price: 1410,
+    image: 'https://images.unsplash.com/photo-1583743814966-8936f37f4ea2?w=400&h=400&fit=crop&auto=format'
   }
 ];
 
@@ -102,8 +102,19 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
             
             <CardContent className="space-y-4">
               {/* Shirt Preview */}
-              <div className="aspect-square bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                <Shirt className="w-20 h-20 text-gray-400" />
+              <div className="aspect-square bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg overflow-hidden">
+                <img 
+                  src={shirt.image} 
+                  alt={shirt.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden w-full h-full flex items-center justify-center">
+                  <Shirt className="w-20 h-20 text-gray-400" />
+                </div>
               </div>
               
               {/* Color Options */}
@@ -122,7 +133,7 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
               
               {/* Price and Action */}
               <div className="flex items-center justify-between pt-2">
-                <span className="text-2xl font-bold text-gray-900">${shirt.price}</span>
+                <span className="text-2xl font-bold text-gray-900">₹{shirt.price.toLocaleString('en-IN')}</span>
                 <Button 
                   onClick={() => onShirtSelect(shirt)}
                   className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
