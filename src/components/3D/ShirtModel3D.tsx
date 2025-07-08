@@ -187,18 +187,19 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
       {/* Front design - only show when not showing back and texture is loaded */}
       {frontTexture && !showBack && (
         <mesh 
-          position={[frontPlacement.x, frontPlacement.y, 0.08]}
+          position={[frontPlacement.x, frontPlacement.y, 0.15]}
           rotation={[0, 0, frontPlacement.rotation]}
-          scale={[frontPlacement.scale * 0.8, frontPlacement.scale * 0.8, 1]}
+          scale={[frontPlacement.scale * 1.2, frontPlacement.scale * 1.2, 1]}
+          renderOrder={1}
         >
           <planeGeometry args={[1, 1]} />
-          <meshStandardMaterial 
+          <meshBasicMaterial 
             transparent 
-            opacity={1}
+            opacity={0.95}
             map={frontTexture}
             alphaTest={0.1}
             side={THREE.DoubleSide}
-            depthWrite={false}
+            toneMapped={false}
           />
         </mesh>
       )}
@@ -206,19 +207,35 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
       {/* Back design - only show when showing back and texture is loaded */}
       {backTexture && showBack && (
         <mesh 
-          position={[-backPlacement.x, backPlacement.y, -0.08]}
+          position={[-backPlacement.x, backPlacement.y, -0.15]}
           rotation={[0, Math.PI, -backPlacement.rotation]}
-          scale={[backPlacement.scale * 0.8, backPlacement.scale * 0.8, 1]}
+          scale={[backPlacement.scale * 1.2, backPlacement.scale * 1.2, 1]}
+          renderOrder={1}
         >
           <planeGeometry args={[1, 1]} />
-          <meshStandardMaterial 
+          <meshBasicMaterial 
             transparent 
-            opacity={1}
+            opacity={0.95}
             map={backTexture}
             alphaTest={0.1}
             side={THREE.DoubleSide}
-            depthWrite={false}
+            toneMapped={false}
           />
+        </mesh>
+      )}
+      
+      {/* Visual indicator when design is applied */}
+      {(frontTexture && !showBack) && (
+        <mesh position={[0, -1.8, 0.2]}>
+          <planeGeometry args={[0.5, 0.1]} />
+          <meshBasicMaterial color="#22c55e" transparent opacity={0.8} />
+        </mesh>
+      )}
+      
+      {(backTexture && showBack) && (
+        <mesh position={[0, -1.8, -0.2]}>
+          <planeGeometry args={[0.5, 0.1]} />
+          <meshBasicMaterial color="#22c55e" transparent opacity={0.8} />
         </mesh>
       )}
       
