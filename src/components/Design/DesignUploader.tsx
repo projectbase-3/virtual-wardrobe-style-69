@@ -4,6 +4,8 @@ import { Upload, Image as ImageIcon, Palette, Sparkles, Type, Shapes } from 'luc
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TextCreator } from './TextCreator';
+import { ArtCreator } from './ArtCreator';
 
 interface DesignUploaderProps {
   onDesignUpload: (design: string, type: 'front' | 'back') => void;
@@ -18,6 +20,8 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [activeArea, setActiveArea] = useState<'front' | 'back'>('front');
+  const [showTextCreator, setShowTextCreator] = useState(false);
+  const [showArtCreator, setShowArtCreator] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -61,7 +65,36 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
     fileInputRef.current?.click();
   };
 
+  const handleTextCreated = (textImage: string) => {
+    onDesignUpload(textImage, activeArea);
+    setShowTextCreator(false);
+  };
+
+  const handleArtCreated = (artImage: string) => {
+    onDesignUpload(artImage, activeArea);
+    setShowArtCreator(false);
+  };
+
   const currentDesign = activeArea === 'front' ? frontDesign : backDesign;
+
+  // Show text or art creator
+  if (showTextCreator) {
+    return (
+      <TextCreator
+        onTextCreated={handleTextCreated}
+        onClose={() => setShowTextCreator(false)}
+      />
+    );
+  }
+
+  if (showArtCreator) {
+    return (
+      <ArtCreator
+        onArtCreated={handleArtCreated}
+        onClose={() => setShowArtCreator(false)}
+      />
+    );
+  }
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
@@ -151,11 +184,21 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
         <div className="border-t pt-4 space-y-2">
           <h4 className="text-sm font-medium text-gray-700">Quick Tools</h4>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowTextCreator(true)}
+            >
               <Type className="w-3 h-3" />
               Add Text
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowArtCreator(true)}
+            >
               <Shapes className="w-3 h-3" />
               Add Art
             </Button>

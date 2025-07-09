@@ -33,7 +33,7 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
           texture.wrapT = THREE.ClampToEdgeWrapping;
           texture.minFilter = THREE.LinearFilter;
           texture.magFilter = THREE.LinearFilter;
-          texture.flipY = true;
+          texture.flipY = false; // Set to false to prevent upside down images
           texture.needsUpdate = true;
           setFrontTexture(texture);
           setTextureLoadingState(prev => ({ ...prev, front: 'loaded' }));
@@ -72,7 +72,7 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
           texture.wrapT = THREE.ClampToEdgeWrapping;
           texture.minFilter = THREE.LinearFilter;
           texture.magFilter = THREE.LinearFilter;
-          texture.flipY = true;
+          texture.flipY = false; // Set to false to prevent upside down images
           texture.needsUpdate = true;
           setBackTexture(texture);
           setTextureLoadingState(prev => ({ ...prev, back: 'loaded' }));
