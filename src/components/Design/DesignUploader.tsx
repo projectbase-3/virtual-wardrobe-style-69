@@ -11,18 +11,26 @@ interface DesignUploaderProps {
   onDesignUpload: (design: string, type: 'front' | 'back') => void;
   frontDesign?: string | null;
   backDesign?: string | null;
+  onActiveDesignSideChange?: (side: 'front' | 'back') => void;
 }
 
 export const DesignUploader: React.FC<DesignUploaderProps> = ({ 
   onDesignUpload, 
   frontDesign,
-  backDesign 
+  backDesign,
+  onActiveDesignSideChange
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [activeArea, setActiveArea] = useState<'front' | 'back'>('front');
   const [showTextCreator, setShowTextCreator] = useState(false);
   const [showArtCreator, setShowArtCreator] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAreaChange = (value: string) => {
+    const area = value as 'front' | 'back';
+    setActiveArea(area);
+    onActiveDesignSideChange?.(area);
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -105,10 +113,14 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Tabs value={activeArea} onValueChange={(value) => setActiveArea(value as 'front' | 'back')}>
+        <Tabs value={activeArea} onValueChange={handleAreaChange}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="front">Front Design</TabsTrigger>
-            <TabsTrigger value="back">Back Design</TabsTrigger>
+            <TabsTrigger value="front" className="gap-2">
+              Front {frontDesign && <span className="text-green-500">✓</span>}
+            </TabsTrigger>
+            <TabsTrigger value="back" className="gap-2">
+              Back {backDesign && <span className="text-green-500">✓</span>}
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value={activeArea} className="space-y-4 mt-4">
@@ -203,6 +215,9 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
               Add Art
             </Button>
           </div>
+          <p className="text-xs text-gray-500 text-center">
+            Adding to: {activeArea.charAt(0).toUpperCase() + activeArea.slice(1)} side
+          </p>
         </div>
       </CardContent>
     </Card>

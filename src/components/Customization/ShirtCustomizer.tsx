@@ -26,6 +26,7 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
   const [selectedColor, setSelectedColor] = useState(selectedShirt?.colors?.[0] || '#ffffff');
   const [autoRotate, setAutoRotate] = useState(false);
   const [showBack, setShowBack] = useState(false);
+  const [activeDesignSide, setActiveDesignSide] = useState<'front' | 'back'>('front');
   const [frontDesign, setFrontDesign] = useState<string | null>(null);
   const [backDesign, setBackDesign] = useState<string | null>(null);
   const [frontPlacement, setFrontPlacement] = useState<DesignPlacement>({
@@ -47,11 +48,12 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
       frontDesign: frontDesign ? 'has design' : 'no design',
       backDesign: backDesign ? 'has design' : 'no design',
       showBack,
+      activeDesignSide,
       selectedColor,
       frontDesignLength: frontDesign?.length,
       backDesignLength: backDesign?.length
     });
-  }, [frontDesign, backDesign, showBack, selectedColor]);
+  }, [frontDesign, backDesign, showBack, activeDesignSide, selectedColor]);
 
   if (!selectedShirt) {
     return (
@@ -89,6 +91,9 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
       setBackDesign(design);
     }
     
+    // Set the active design side to the uploaded design
+    setActiveDesignSide(type);
+    
     // Force a re-render by triggering state change
     setTimeout(() => {
       console.log('Post-upload state check:', {
@@ -110,6 +115,18 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
     });
   };
 
+  const getCurrentPlacement = () => {
+    return activeDesignSide === 'front' ? frontPlacement : backPlacement;
+  };
+
+  const setCurrentPlacement = (placement: DesignPlacement) => {
+    if (activeDesignSide === 'front') {
+      setFrontPlacement(placement);
+    } else {
+      setBackPlacement(placement);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="text-center space-y-2">
@@ -124,14 +141,15 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
             onDesignUpload={handleDesignUpload}
             frontDesign={frontDesign}
             backDesign={backDesign}
+            onActiveDesignSideChange={setActiveDesignSide}
           />
           
           {/* Design Positioning */}
           {(frontDesign || backDesign) && (
             <DesignPositioner
-              placement={showBack ? backPlacement : frontPlacement}
-              onPlacementChange={showBack ? setBackPlacement : setFrontPlacement}
-              designArea={showBack ? 'back' : 'front'}
+              placement={getCurrentPlacement()}
+              onPlacementChange={setCurrentPlacement}
+              designArea={activeDesignSide}
             />
           )}
         </div>
@@ -213,6 +231,33 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
                 </div>
               </div>
 
+              {/* Active Design Side Selector */}
+              {(frontDesign || backDesign) && (
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-700">Edit Design</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant={activeDesignSide === 'front' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setActiveDesignSide('front')}
+                      disabled={!frontDesign}
+                      className="gap-2"
+                    >
+                      Front {frontDesign && '✓'}
+                    </Button>
+                    <Button
+                      variant={activeDesignSide === 'back' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setActiveDesignSide('back')}
+                      disabled={!backDesign}
+                      className="gap-2"
+                    >
+                      Back {backDesign && '✓'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Design Previews */}
               {(frontDesign || backDesign) && (
                 <div className="space-y-3">
@@ -247,6 +292,7 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
                 <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
                   <p>Debug: Front {frontDesign ? '✓' : '✗'}, Back {backDesign ? '✓' : '✗'}</p>
                   <p>View: {showBack ? 'Back' : 'Front'}</p>
+                  <p>Editing: {activeDesignSide}</p>
                 </div>
               )}
             </CardContent>
