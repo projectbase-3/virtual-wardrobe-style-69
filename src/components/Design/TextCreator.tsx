@@ -27,9 +27,9 @@ export const TextCreator: React.FC<TextCreatorProps> = ({ onTextCreated, onClose
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = 800;
-    canvas.height = 200;
+    // Set canvas size - make it square for better compatibility
+    canvas.width = 512;
+    canvas.height = 512;
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -41,16 +41,23 @@ export const TextCreator: React.FC<TextCreatorProps> = ({ onTextCreated, onClose
     }
 
     // Set text properties
-    ctx.font = `${fontSize}px ${fontFamily}`;
+    const actualFontSize = Math.min(parseInt(fontSize), canvas.width / text.length * 1.5);
+    ctx.font = `${actualFontSize}px ${fontFamily}`;
     ctx.fillStyle = textColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
+    // Add text stroke for better visibility
+    ctx.strokeStyle = backgroundColor === 'transparent' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.2)';
+    ctx.lineWidth = 2;
+    ctx.strokeText(text, canvas.width / 2, canvas.height / 2);
+    
     // Draw text
     ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-    // Convert to data URL
+    // Convert to data URL - this will be detected as a canvas texture
     const dataURL = canvas.toDataURL('image/png');
+    console.log('Text image generated, length:', dataURL.length);
     onTextCreated(dataURL);
   };
 

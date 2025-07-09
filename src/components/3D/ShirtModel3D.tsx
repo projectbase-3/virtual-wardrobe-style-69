@@ -36,7 +36,7 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
   autoRotate = false
 }) => {
   const shirtRef = useRef<Group>(null);
-  const { frontTexture, backTexture, textureLoadingState } = useTextureLoader(frontDesign, backDesign);
+  const { frontTexture, backTexture, frontTextureType, backTextureType, textureLoadingState } = useTextureLoader(frontDesign, backDesign);
 
   useFrame(() => {
     if (shirtRef.current && autoRotate) {
@@ -53,6 +53,8 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
   console.log('ShirtModel3D render state:', {
     frontTexture: !!frontTexture,
     backTexture: !!backTexture,
+    frontTextureType,
+    backTextureType,
     showBack,
     frontDesign: !!frontDesign,
     backDesign: !!backDesign,

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Move, RotateCw, Maximize, Minimize } from 'lucide-react';
+import React from 'react';
+import { Move, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -23,34 +23,44 @@ export const DesignPositioner: React.FC<DesignPositionerProps> = ({
   onPlacementChange,
   designArea
 }) => {
+  console.log('DesignPositioner render:', { placement, designArea });
+
   const handlePositionChange = (axis: 'x' | 'y', value: number[]) => {
-    onPlacementChange({
+    const newPlacement = {
       ...placement,
       [axis]: value[0] / 50 // Convert from -100 to 100 slider to -2 to 2 range
-    });
+    };
+    console.log(`${designArea} ${axis} position changed:`, newPlacement);
+    onPlacementChange(newPlacement);
   };
 
   const handleScaleChange = (value: number[]) => {
-    onPlacementChange({
+    const newPlacement = {
       ...placement,
       scale: value[0] / 50 // Convert from 0-200 slider to 0-4 scale range
-    });
+    };
+    console.log(`${designArea} scale changed:`, newPlacement);
+    onPlacementChange(newPlacement);
   };
 
   const handleRotationChange = (value: number[]) => {
-    onPlacementChange({
+    const newPlacement = {
       ...placement,
       rotation: (value[0] / 100) * Math.PI * 2 // Convert to radians
-    });
+    };
+    console.log(`${designArea} rotation changed:`, newPlacement);
+    onPlacementChange(newPlacement);
   };
 
   const resetPosition = () => {
-    onPlacementChange({
+    const resetPlacement = {
       x: 0,
       y: 0.2,
       scale: 1,
       rotation: 0
-    });
+    };
+    console.log(`${designArea} position reset:`, resetPlacement);
+    onPlacementChange(resetPlacement);
   };
 
   return (

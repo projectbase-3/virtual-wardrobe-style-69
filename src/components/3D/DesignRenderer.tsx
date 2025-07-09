@@ -24,12 +24,20 @@ export const DesignRenderer: React.FC<DesignRendererProps> = ({
   backPlacement,
   showBack
 }) => {
+  console.log('DesignRenderer render:', {
+    frontTexture: !!frontTexture,
+    backTexture: !!backTexture,
+    showBack,
+    frontPlacement,
+    backPlacement
+  });
+
   return (
     <>
-      {/* Front design */}
+      {/* Front design - only show when not showing back */}
       {frontTexture && !showBack && (
         <mesh 
-          position={[frontPlacement.x, frontPlacement.y, 0.2]}
+          position={[frontPlacement.x, frontPlacement.y, 0.21]}
           rotation={[0, 0, frontPlacement.rotation]}
           scale={[frontPlacement.scale, frontPlacement.scale, 1]}
           renderOrder={1}
@@ -46,11 +54,11 @@ export const DesignRenderer: React.FC<DesignRendererProps> = ({
         </mesh>
       )}
       
-      {/* Back design - Fixed positioning */}
+      {/* Back design - only show when showing back */}
       {backTexture && showBack && (
         <mesh 
-          position={[backPlacement.x, backPlacement.y, -0.2]}
-          rotation={[0, Math.PI, backPlacement.rotation]}
+          position={[-backPlacement.x, backPlacement.y, -0.21]}
+          rotation={[0, 0, -backPlacement.rotation]}
           scale={[backPlacement.scale, backPlacement.scale, 1]}
           renderOrder={1}
         >
