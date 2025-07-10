@@ -40,7 +40,7 @@ export const DesignRenderer: React.FC<DesignRendererProps> = ({
           position={[frontPlacement.x, frontPlacement.y, 0.21]}
           rotation={[0, 0, frontPlacement.rotation]}
           scale={[frontPlacement.scale, frontPlacement.scale, 1]}
-          renderOrder={1}
+          renderOrder={2}
         >
           <planeGeometry args={[1, 1]} />
           <meshBasicMaterial 
@@ -57,10 +57,10 @@ export const DesignRenderer: React.FC<DesignRendererProps> = ({
       {/* Back design - always show when available */}
       {backTexture && (
         <mesh 
-          position={[backPlacement.x, backPlacement.y, -0.21]}
-          rotation={[0, Math.PI, backPlacement.rotation]}
+          position={[-backPlacement.x, backPlacement.y, -0.21]}
+          rotation={[0, Math.PI, -backPlacement.rotation]}
           scale={[backPlacement.scale, backPlacement.scale, 1]}
-          renderOrder={1}
+          renderOrder={2}
         >
           <planeGeometry args={[1, 1]} />
           <meshBasicMaterial 

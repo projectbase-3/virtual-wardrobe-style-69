@@ -26,9 +26,34 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
     return dataUrl.includes('data:image/png;base64') && dataUrl.length > 50000 ? 'canvas' : 'uploaded';
   };
 
+  // Helper function to configure texture based on type and side
+  const configureTexture = (texture: THREE.Texture, type: 'uploaded' | 'canvas', side: 'front' | 'back') => {
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    
+    // Configure flipY based on texture type and side
+    if (type === 'canvas') {
+      // Canvas textures: front side normal, back side flipped
+      texture.flipY = side === 'front';
+    } else {
+      // Uploaded images: both sides normal (no flip)
+      texture.flipY = false;
+    }
+    
+    texture.needsUpdate = true;
+    return texture;
+  };
+
   // Load front texture
   useEffect(() => {
     console.log('Front design changed:', frontDesign);
+    
+    // Clean up previous texture
+    if (frontTextureInfo?.texture) {
+      frontTextureInfo.texture.dispose();
+    }
     
     if (frontDesign && typeof frontDesign === 'string' && frontDesign.trim() !== '') {
       setTextureLoadingState(prev => ({ ...prev, front: 'loading' }));
@@ -41,20 +66,8 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
         frontDesign,
         (texture) => {
           console.log('Front texture loaded successfully, type:', textureType);
-          texture.wrapS = THREE.ClampToEdgeWrapping;
-          texture.wrapT = THREE.ClampToEdgeWrapping;
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          
-          // Set flipY based on texture type
-          if (textureType === 'canvas') {
-            texture.flipY = true; // Canvas textures need to be flipped
-          } else {
-            texture.flipY = false; // Uploaded images should not be flipped
-          }
-          
-          texture.needsUpdate = true;
-          setFrontTextureInfo({ texture, type: textureType });
+          const configuredTexture = configureTexture(texture, textureType, 'front');
+          setFrontTextureInfo({ texture: configuredTexture, type: textureType });
           setTextureLoadingState(prev => ({ ...prev, front: 'loaded' }));
         },
         (progress) => {
@@ -77,6 +90,11 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
   useEffect(() => {
     console.log('Back design changed:', backDesign);
     
+    // Clean up previous texture
+    if (backTextureInfo?.texture) {
+      backTextureInfo.texture.dispose();
+    }
+    
     if (backDesign && typeof backDesign === 'string' && backDesign.trim() !== '') {
       setTextureLoadingState(prev => ({ ...prev, back: 'loading' }));
       console.log('Loading back texture from:', backDesign.substring(0, 50) + '...');
@@ -88,20 +106,8 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
         backDesign,
         (texture) => {
           console.log('Back texture loaded successfully, type:', textureType);
-          texture.wrapS = THREE.ClampToEdgeWrapping;
-          texture.wrapT = THREE.ClampToEdgeWrapping;
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          
-          // Set flipY based on texture type
-          if (textureType === 'canvas') {
-            texture.flipY = true; // Canvas textures need to be flipped
-          } else {
-            texture.flipY = false; // Uploaded images should not be flipped
-          }
-          
-          texture.needsUpdate = true;
-          setBackTextureInfo({ texture, type: textureType });
+          const configuredTexture = configureTexture(texture, textureType, 'back');
+          setBackTextureInfo({ texture: configuredTexture, type: textureType });
           setTextureLoadingState(prev => ({ ...prev, back: 'loaded' }));
         },
         (progress) => {
@@ -119,6 +125,18 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
       setTextureLoadingState(prev => ({ ...prev, back: 'idle' }));
     }
   }, [backDesign]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (frontTextureInfo?.texture) {
+        frontTextureInfo.texture.dispose();
+      }
+      if (backTextureInfo?.texture) {
+        backTextureInfo.texture.dispose();
+      }
+    };
+  }, []);
 
   return {
     frontTexture: frontTextureInfo?.texture || null,
