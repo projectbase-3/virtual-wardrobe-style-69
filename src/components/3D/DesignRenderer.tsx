@@ -58,7 +58,7 @@ export const DesignRenderer: React.FC<DesignRendererProps> = ({
       {backTexture && (
         <mesh 
           position={[-backPlacement.x, backPlacement.y, -0.21]}
-          rotation={[0, Math.PI, -backPlacement.rotation]}
+          rotation={[0, Math.PI, backPlacement.rotation]}
           scale={[backPlacement.scale, backPlacement.scale, 1]}
           renderOrder={2}
         >

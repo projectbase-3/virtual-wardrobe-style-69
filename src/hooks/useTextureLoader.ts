@@ -33,12 +33,12 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     
-    // Configure flipY based on texture type and side
+    // Configure flipY based on texture type only
     if (type === 'canvas') {
-      // Canvas textures: front side normal, back side flipped
-      texture.flipY = side === 'front';
+      // Canvas textures need to be flipped for correct orientation
+      texture.flipY = true;
     } else {
-      // Uploaded images: both sides normal (no flip)
+      // Uploaded images should not be flipped (they come correctly oriented)
       texture.flipY = false;
     }
     
