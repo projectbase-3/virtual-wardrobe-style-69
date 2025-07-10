@@ -26,21 +26,15 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
     return dataUrl.includes('data:image/png;base64') && dataUrl.length > 50000 ? 'canvas' : 'uploaded';
   };
 
-  // Helper function to configure texture based on type and side
+  // Helper function to configure texture
   const configureTexture = (texture: THREE.Texture, type: 'uploaded' | 'canvas', side: 'front' | 'back') => {
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     
-    // Configure flipY based on texture type only
-    if (type === 'canvas') {
-      // Canvas textures need to be flipped for correct orientation
-      texture.flipY = true;
-    } else {
-      // Uploaded images should not be flipped (they come correctly oriented)
-      texture.flipY = false;
-    }
+    // No flipping for any textures to prevent inversion
+    texture.flipY = false;
     
     texture.needsUpdate = true;
     return texture;
