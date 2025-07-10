@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import * as THREE from 'three';
 
@@ -33,8 +32,10 @@ export const useTextureLoader = (frontDesign?: string, backDesign?: string) => {
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     
-    // No flipping for any textures to prevent inversion
-    texture.flipY = false;
+    // Configure flipY to ensure correct orientation
+    // Canvas textures (text/art) need to be flipped to display correctly
+    // Uploaded images should display with their natural orientation
+    texture.flipY = type === 'canvas';
     
     texture.needsUpdate = true;
     return texture;
