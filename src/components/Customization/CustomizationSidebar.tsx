@@ -41,6 +41,10 @@ export const CustomizationSidebar: React.FC<CustomizationSidebarProps> = ({
     return activeDesignSide === 'front' ? frontPlacement : backPlacement;
   };
 
+  const getCurrentDesign = () => {
+    return activeDesignSide === 'front' ? frontDesign : backDesign;
+  };
+
   return (
     <div className="space-y-4">
       {!showPositioner ? (
@@ -57,6 +61,7 @@ export const CustomizationSidebar: React.FC<CustomizationSidebarProps> = ({
           onPlacementChange={onPlacementChange}
           designArea={activeDesignSide}
           onBackToUploader={onBackToUploader}
+          currentDesign={getCurrentDesign()}
         />
       )}
     </div>
