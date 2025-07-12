@@ -12,13 +12,15 @@ interface DesignUploaderProps {
   frontDesign?: string | null;
   backDesign?: string | null;
   onActiveDesignSideChange?: (side: 'front' | 'back') => void;
+  onShowPositioner?: () => void;
 }
 
 export const DesignUploader: React.FC<DesignUploaderProps> = ({ 
   onDesignUpload, 
   frontDesign,
   backDesign,
-  onActiveDesignSideChange
+  onActiveDesignSideChange,
+  onShowPositioner
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [activeArea, setActiveArea] = useState<'front' | 'back'>('front');
@@ -67,6 +69,11 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
         const result = e.target?.result as string;
         console.log('File uploaded for:', activeArea, 'Size:', result.length);
         onDesignUpload(result, activeArea);
+        
+        // Auto-switch to position design section after upload
+        setTimeout(() => {
+          onShowPositioner?.();
+        }, 500);
       };
       reader.readAsDataURL(file);
     }
@@ -80,12 +87,22 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
     console.log('Text created for:', activeArea, 'Size:', textImage.length);
     onDesignUpload(textImage, activeArea);
     setShowTextCreator(false);
+    
+    // Auto-switch to position design section after creating text
+    setTimeout(() => {
+      onShowPositioner?.();
+    }, 500);
   };
 
   const handleArtCreated = (artImage: string) => {
     console.log('Art created for:', activeArea, 'Size:', artImage.length);
     onDesignUpload(artImage, activeArea);
     setShowArtCreator(false);
+    
+    // Auto-switch to position design section after creating art
+    setTimeout(() => {
+      onShowPositioner?.();
+    }, 500);
   };
 
   const currentDesign = activeArea === 'front' ? frontDesign : backDesign;

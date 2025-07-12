@@ -27,6 +27,7 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
   const [autoRotate, setAutoRotate] = useState(false);
   const [showBack, setShowBack] = useState(false);
   const [activeDesignSide, setActiveDesignSide] = useState<'front' | 'back'>('front');
+  const [showPositioner, setShowPositioner] = useState(false);
   const [frontDesign, setFrontDesign] = useState<string | null>(null);
   const [backDesign, setBackDesign] = useState<string | null>(null);
   const [frontPlacement, setFrontPlacement] = useState<DesignPlacement>({
@@ -50,10 +51,11 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
       showBack,
       activeDesignSide,
       selectedColor,
+      showPositioner,
       frontDesignLength: frontDesign?.length,
       backDesignLength: backDesign?.length
     });
-  }, [frontDesign, backDesign, showBack, activeDesignSide, selectedColor]);
+  }, [frontDesign, backDesign, showBack, activeDesignSide, selectedColor, showPositioner]);
 
   if (!selectedShirt) {
     return (
@@ -127,6 +129,14 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
     }
   };
 
+  const handleShowPositioner = () => {
+    setShowPositioner(true);
+  };
+
+  const handleBackToUploader = () => {
+    setShowPositioner(false);
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="text-center space-y-2">
@@ -137,19 +147,20 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Left Sidebar - Design Tools */}
         <div className="lg:col-span-1 space-y-4">
-          <DesignUploader
-            onDesignUpload={handleDesignUpload}
-            frontDesign={frontDesign}
-            backDesign={backDesign}
-            onActiveDesignSideChange={setActiveDesignSide}
-          />
-          
-          {/* Design Positioning */}
-          {(frontDesign || backDesign) && (
+          {!showPositioner ? (
+            <DesignUploader
+              onDesignUpload={handleDesignUpload}
+              frontDesign={frontDesign}
+              backDesign={backDesign}
+              onActiveDesignSideChange={setActiveDesignSide}
+              onShowPositioner={handleShowPositioner}
+            />
+          ) : (
             <DesignPositioner
               placement={getCurrentPlacement()}
               onPlacementChange={setCurrentPlacement}
               designArea={activeDesignSide}
+              onBackToUploader={handleBackToUploader}
             />
           )}
         </div>
@@ -293,6 +304,7 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
                   <p>Debug: Front {frontDesign ? '✓' : '✗'}, Back {backDesign ? '✓' : '✗'}</p>
                   <p>View: {showBack ? 'Back' : 'Front'}</p>
                   <p>Editing: {activeDesignSide}</p>
+                  <p>Mode: {showPositioner ? 'Position' : 'Upload'}</p>
                 </div>
               )}
             </CardContent>

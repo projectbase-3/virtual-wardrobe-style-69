@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Move, RotateCw } from 'lucide-react';
+import { Move, RotateCw, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -16,12 +16,14 @@ interface DesignPositionerProps {
   placement: DesignPlacement;
   onPlacementChange: (placement: DesignPlacement) => void;
   designArea: 'front' | 'back';
+  onBackToUploader?: () => void;
 }
 
 export const DesignPositioner: React.FC<DesignPositionerProps> = ({
   placement,
   onPlacementChange,
-  designArea
+  designArea,
+  onBackToUploader
 }) => {
   console.log('DesignPositioner render:', { placement, designArea });
 
@@ -66,9 +68,22 @@ export const DesignPositioner: React.FC<DesignPositionerProps> = ({
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Move className="w-4 h-4" />
-          Position Design - {designArea.charAt(0).toUpperCase() + designArea.slice(1)}
+        <CardTitle className="text-sm font-medium flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Move className="w-4 h-4" />
+            Position Design - {designArea.charAt(0).toUpperCase() + designArea.slice(1)}
+          </div>
+          {onBackToUploader && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={onBackToUploader}
+              className="gap-1 text-xs"
+            >
+              <ArrowLeft className="w-3 h-3" />
+              Back to Upload
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
