@@ -34,11 +34,11 @@ export const DesignRenderer: React.FC<DesignRendererProps> = ({
 
   return (
     <>
-      {/* Front design - positioned like back design */}
+      {/* Front design - positioned and rotated exactly like back design */}
       {frontTexture && (
         <mesh 
           position={[-frontPlacement.x, frontPlacement.y, 0.21]}
-          rotation={[0, Math.PI, frontPlacement.rotation]}
+          rotation={[0, Math.PI, -frontPlacement.rotation]}
           scale={[frontPlacement.scale, frontPlacement.scale, 1]}
           renderOrder={2}
         >
