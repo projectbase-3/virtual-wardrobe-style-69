@@ -1,11 +1,13 @@
 
-import React, { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, Palette, Sparkles, Type, Shapes } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { Palette } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TextCreator } from './TextCreator';
 import { ArtCreator } from './ArtCreator';
+import { DesignDropZone } from './DesignDropZone';
+import { DesignPreview } from './DesignPreview';
+import { QuickToolsSection } from './QuickToolsSection';
 
 interface DesignUploaderProps {
   onDesignUpload: (design: string, type: 'front' | 'back') => void;
@@ -26,7 +28,6 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
   const [activeArea, setActiveArea] = useState<'front' | 'back'>('front');
   const [showTextCreator, setShowTextCreator] = useState(false);
   const [showArtCreator, setShowArtCreator] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAreaChange = (value: string) => {
     const area = value as 'front' | 'back';
@@ -54,14 +55,6 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
     }
   };
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-    // Clear the input value to allow re-uploading the same file
-    e.target.value = '';
-  };
-
   const handleFile = (file: File) => {
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
@@ -77,10 +70,6 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const openFileDialog = () => {
-    fileInputRef.current?.click();
   };
 
   const handleTextCreated = (textImage: string) => {
@@ -146,89 +135,28 @@ export const DesignUploader: React.FC<DesignUploaderProps> = ({
           </TabsList>
           
           <TabsContent value={activeArea} className="space-y-4 mt-4">
-            <div
-              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
-                dragActive 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-              }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <div className="space-y-3">
-                {currentDesign ? (
-                  <div className="space-y-3">
-                    <img
-                      src={currentDesign}
-                      alt={`${activeArea} design`}
-                      className="w-20 h-20 object-contain mx-auto rounded-lg shadow-lg bg-white p-2"
-                    />
-                    <div className="flex items-center justify-center gap-2">
-                      <Sparkles className="w-4 h-4 text-green-500" />
-                      <span className="text-green-700 font-medium text-sm">
-                        {activeArea.charAt(0).toUpperCase() + activeArea.slice(1)} design uploaded!
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                    <Upload className="w-8 h-8 text-blue-600" />
-                  </div>
-                )}
-                
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {currentDesign ? 'Replace' : 'Add'} {activeArea} design
-                  </h3>
-                  <p className="text-gray-600 mb-3 text-sm">
-                    PNG, JPG, or SVG files work best
-                  </p>
-                  <Button onClick={openFileDialog} className="gap-2">
-                    <ImageIcon className="w-4 h-4" />
-                    {currentDesign ? 'Change Design' : 'Upload Design'}
-                  </Button>
-                </div>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileInput}
-                className="hidden"
+            {currentDesign ? (
+              <DesignPreview design={currentDesign} activeArea={activeArea} />
+            ) : (
+              <DesignDropZone
+                dragActive={dragActive}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onFileSelect={handleFile}
+                hasDesign={!!currentDesign}
+                activeArea={activeArea}
               />
-            </div>
+            )}
           </TabsContent>
         </Tabs>
 
-        {/* Design Tools */}
-        <div className="border-t pt-4 space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Quick Tools</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2"
-              onClick={() => setShowTextCreator(true)}
-            >
-              <Type className="w-3 h-3" />
-              Add Text
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2"
-              onClick={() => setShowArtCreator(true)}
-            >
-              <Shapes className="w-3 h-3" />
-              Add Art
-            </Button>
-          </div>
-          <p className="text-xs text-gray-500 text-center">
-            Adding to: {activeArea.charAt(0).toUpperCase() + activeArea.slice(1)} side
-          </p>
-        </div>
+        <QuickToolsSection
+          activeArea={activeArea}
+          onShowTextCreator={() => setShowTextCreator(true)}
+          onShowArtCreator={() => setShowArtCreator(true)}
+        />
       </CardContent>
     </Card>
   );
