@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { RotateCcw, Palette, Download, ShoppingCart, Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShirtViewer360 } from '../3D/ShirtViewer360';
-import { DesignUploader } from '../Design/DesignUploader';
-import { DesignPositioner } from '../Design/DesignPositioner';
+import { Palette } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ShirtCustomizerHeader } from './ShirtCustomizerHeader';
+import { ShirtViewer3DPanel } from './ShirtViewer3DPanel';
+import { ShirtInfoPanel } from './ShirtInfoPanel';
+import { CustomizationSidebar } from './CustomizationSidebar';
 
 interface DesignPlacement {
   x: number;
@@ -117,16 +117,21 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
     });
   };
 
-  const getCurrentPlacement = () => {
-    return activeDesignSide === 'front' ? frontPlacement : backPlacement;
-  };
-
-  const setCurrentPlacement = (placement: DesignPlacement) => {
+  const handlePlacementChange = (placement: DesignPlacement) => {
     if (activeDesignSide === 'front') {
       setFrontPlacement(placement);
     } else {
       setBackPlacement(placement);
     }
+  };
+
+  const handleToggleView = () => {
+    console.log('Toggling view to:', !showBack ? 'back' : 'front');
+    setShowBack(!showBack);
+  };
+
+  const handleToggleAutoRotate = () => {
+    setAutoRotate(!autoRotate);
   };
 
   const handleShowPositioner = () => {
@@ -139,193 +144,55 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-gray-900">Design Your {selectedShirt.name}</h2>
-        <p className="text-lg text-gray-600">Upload your designs and position them perfectly</p>
-      </div>
+      <ShirtCustomizerHeader shirtName={selectedShirt.name} />
 
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Left Sidebar - Design Tools */}
-        <div className="lg:col-span-1 space-y-4">
-          {!showPositioner ? (
-            <DesignUploader
-              onDesignUpload={handleDesignUpload}
-              frontDesign={frontDesign}
-              backDesign={backDesign}
-              onActiveDesignSideChange={setActiveDesignSide}
-              onShowPositioner={handleShowPositioner}
-            />
-          ) : (
-            <DesignPositioner
-              placement={getCurrentPlacement()}
-              onPlacementChange={setCurrentPlacement}
-              designArea={activeDesignSide}
-              onBackToUploader={handleBackToUploader}
-            />
-          )}
+        <div className="lg:col-span-1">
+          <CustomizationSidebar
+            showPositioner={showPositioner}
+            frontDesign={frontDesign}
+            backDesign={backDesign}
+            activeDesignSide={activeDesignSide}
+            frontPlacement={frontPlacement}
+            backPlacement={backPlacement}
+            onDesignUpload={handleDesignUpload}
+            onActiveDesignSideChange={setActiveDesignSide}
+            onShowPositioner={handleShowPositioner}
+            onBackToUploader={handleBackToUploader}
+            onPlacementChange={handlePlacementChange}
+          />
         </div>
 
         {/* Center - 3D Viewer */}
         <div className="lg:col-span-2">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <RotateCcw className="w-5 h-5 text-blue-600" />
-                  3D Preview
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    variant={showBack ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      console.log('Toggling view to:', !showBack ? 'back' : 'front');
-                      setShowBack(!showBack);
-                    }}
-                    className="gap-2"
-                  >
-                    {showBack ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    {showBack ? 'Show Front' : 'Show Back'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setAutoRotate(!autoRotate)}
-                  >
-                    {autoRotate ? 'Stop Rotation' : 'Auto Rotate'}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ShirtViewer360
-                shirtColor={selectedColor}
-                frontDesign={frontDesign}
-                backDesign={backDesign}
-                frontPlacement={frontPlacement}
-                backPlacement={backPlacement}
-                showBack={showBack}
-                autoRotate={autoRotate}
-              />
-            </CardContent>
-          </Card>
+          <ShirtViewer3DPanel
+            selectedColor={selectedColor}
+            frontDesign={frontDesign}
+            backDesign={backDesign}
+            frontPlacement={frontPlacement}
+            backPlacement={backPlacement}
+            showBack={showBack}
+            autoRotate={autoRotate}
+            onToggleView={handleToggleView}
+            onToggleAutoRotate={handleToggleAutoRotate}
+          />
         </div>
 
         {/* Right Sidebar - Customization Options */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Shirt Information */}
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg">{selectedShirt.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-2xl font-bold text-gray-900">
-                ₹{selectedShirt.price?.toLocaleString('en-IN')}
-              </div>
-              
-              {/* Color Selection */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">Shirt Color</label>
-                <div className="flex gap-2 flex-wrap">
-                  {selectedShirt.colors.map((color: string, index: number) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedColor(color)}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${
-                        selectedColor === color 
-                          ? 'border-blue-500 ring-2 ring-blue-200' 
-                          : 'border-gray-300 hover:border-gray-400'
-                      }`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Active Design Side Selector */}
-              {(frontDesign || backDesign) && (
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">Edit Design</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant={activeDesignSide === 'front' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setActiveDesignSide('front')}
-                      disabled={!frontDesign}
-                      className="gap-2"
-                    >
-                      Front {frontDesign && '✓'}
-                    </Button>
-                    <Button
-                      variant={activeDesignSide === 'back' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setActiveDesignSide('back')}
-                      disabled={!backDesign}
-                      className="gap-2"
-                    >
-                      Back {backDesign && '✓'}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Design Previews */}
-              {(frontDesign || backDesign) && (
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">Your Designs</label>
-                  <div className="flex gap-2">
-                    {frontDesign && (
-                      <div className="text-center">
-                        <img
-                          src={frontDesign}
-                          alt="Front design"
-                          className="w-12 h-12 object-contain bg-white rounded border"
-                        />
-                        <span className="text-xs text-gray-600">Front</span>
-                      </div>
-                    )}
-                    {backDesign && (
-                      <div className="text-center">
-                        <img
-                          src={backDesign}
-                          alt="Back design"
-                          className="w-12 h-12 object-contain bg-white rounded border"
-                        />
-                        <span className="text-xs text-gray-600">Back</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Debug Info */}
-              {(frontDesign || backDesign) && (
-                <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                  <p>Debug: Front {frontDesign ? '✓' : '✗'}, Back {backDesign ? '✓' : '✗'}</p>
-                  <p>View: {showBack ? 'Back' : 'Front'}</p>
-                  <p>Editing: {activeDesignSide}</p>
-                  <p>Mode: {showPositioner ? 'Position' : 'Upload'}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            <Button 
-              onClick={handleSaveDesign}
-              className="w-full gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-            >
-              <Download className="w-4 h-4" />
-              Save Design
-            </Button>
-            <Button 
-              className="w-full gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              Get Quote
-            </Button>
-          </div>
+        <div className="lg:col-span-1">
+          <ShirtInfoPanel
+            selectedShirt={selectedShirt}
+            selectedColor={selectedColor}
+            frontDesign={frontDesign}
+            backDesign={backDesign}
+            activeDesignSide={activeDesignSide}
+            showBack={showBack}
+            showPositioner={showPositioner}
+            onColorChange={setSelectedColor}
+            onActiveDesignSideChange={setActiveDesignSide}
+            onSaveDesign={handleSaveDesign}
+          />
         </div>
       </div>
     </div>
