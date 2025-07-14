@@ -1,9 +1,12 @@
 
-import React from 'react';
-import { Shirt, Heart, Palette } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shirt, Heart, Palette, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ShirtModel {
   id: string;
@@ -19,7 +22,7 @@ interface ShirtCollection3DProps {
   userDesign?: string;
 }
 
-const shirtModels: ShirtModel[] = [
+const defaultShirtModels: ShirtModel[] = [
   {
     id: '1',
     name: 'Classic T-Shirt',
@@ -66,7 +69,7 @@ const shirtModels: ShirtModel[] = [
     type: 'Tank Top',
     colors: ['#ffffff', '#000000', '#f59e0b', '#ef4444'],
     price: 1410,
-    image: 'https://images.unsplash.com/photo-1583743814966-8936f37f4ea2?w=400&h=400&fit=crop&auto=format'
+    image: 'https://images.unsplash.com/photo-1583743814966-8936f4ea2?w=400&h=400&fit=crop&auto=format'
   }
 ];
 
@@ -74,6 +77,33 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
   onShirtSelect,
   userDesign
 }) => {
+  const [shirtModels, setShirtModels] = useState<ShirtModel[]>(defaultShirtModels);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newShirt, setNewShirt] = useState({
+    name: '',
+    type: '',
+    colors: ['#ffffff', '#000000'],
+    price: 0,
+    image: ''
+  });
+
+  const handleAddShirt = () => {
+    if (newShirt.name && newShirt.type && newShirt.price > 0) {
+      const newShirtModel: ShirtModel = {
+        id: (shirtModels.length + 1).toString(),
+        name: newShirt.name,
+        type: newShirt.type,
+        colors: newShirt.colors,
+        price: newShirt.price,
+        image: newShirt.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+      };
+      
+      setShirtModels([...shirtModels, newShirtModel]);
+      setNewShirt({ name: '', type: '', colors: ['#ffffff', '#000000'], price: 0, image: '' });
+      setIsDialogOpen(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="text-center space-y-2">
@@ -81,6 +111,81 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
         <p className="text-lg text-gray-600">
           Select from our collection of 3D shirt models to customize with your design
         </p>
+      </div>
+
+      <div className="flex justify-end mb-4">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              Add Shirt Type
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add New Shirt Type</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={newShirt.name}
+                  onChange={(e) => setNewShirt({ ...newShirt, name: e.target.value })}
+                  className="col-span-3"
+                  placeholder="e.g., Premium Hoodie"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right">
+                  Type
+                </Label>
+                <Input
+                  id="type"
+                  value={newShirt.type}
+                  onChange={(e) => setNewShirt({ ...newShirt, type: e.target.value })}
+                  className="col-span-3"
+                  placeholder="e.g., Hoodie"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-right">
+                  Price (₹)
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={newShirt.price}
+                  onChange={(e) => setNewShirt({ ...newShirt, price: parseInt(e.target.value) || 0 })}
+                  className="col-span-3"
+                  placeholder="e.g., 2500"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="image" className="text-right">
+                  Image URL
+                </Label>
+                <Input
+                  id="image"
+                  value={newShirt.image}
+                  onChange={(e) => setNewShirt({ ...newShirt, image: e.target.value })}
+                  className="col-span-3"
+                  placeholder="Optional: https://..."
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddShirt}>
+                Add Shirt
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
