@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Shirt, Heart, Palette, Plus } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Shirt, Heart, Palette, Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +86,23 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
     price: 0,
     image: ''
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setNewShirt({ ...newShirt, image: result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleAddShirt = () => {
     if (newShirt.name && newShirt.type && newShirt.price > 0) {
@@ -165,15 +182,44 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="image" className="text-right">
-                  Image URL
+                  Image
                 </Label>
-                <Input
-                  id="image"
-                  value={newShirt.image}
-                  onChange={(e) => setNewShirt({ ...newShirt, image: e.target.value })}
-                  className="col-span-3"
-                  placeholder="Optional: https://..."
-                />
+                <div className="col-span-3 space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={openFileDialog}
+                    className="w-full gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Image
+                  </Button>
+                  {newShirt.image && (
+                    <div className="relative">
+                      <img
+                        src={newShirt.image}
+                        alt="Preview"
+                        className="w-full h-20 object-cover rounded border"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setNewShirt({ ...newShirt, image: '' })}
+                        className="absolute top-1 right-1 h-6 w-6 p-0"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
               </div>
             </div>
             <div className="flex justify-end gap-2">
