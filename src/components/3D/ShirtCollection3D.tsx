@@ -1,12 +1,14 @@
 
-import React, { useState, useRef } from 'react';
-import { Shirt, Heart, Palette, Plus, Upload } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Shirt, Heart, Palette, Plus, Upload, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface ShirtModel {
   id: string;
@@ -77,8 +79,10 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
   onShirtSelect,
   userDesign
 }) => {
-  const [shirtModels, setShirtModels] = useState<ShirtModel[]>(defaultShirtModels);
+  const [shirtModels, setShirtModels] = useState<ShirtModel[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [is3DDialogOpen, setIs3DDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newShirt, setNewShirt] = useState({
     name: '',
     type: '',
@@ -87,6 +91,62 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
     image: ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load shirts from Supabase on component mount
+  useEffect(() => {
+    const loadShirts = async () => {
+      try {
+        // First load default shirts if none exist in database
+        const { data: existingShirts, error: fetchError } = await supabase
+          .from('shirt_designs')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (fetchError) {
+          console.error('Error fetching shirts:', fetchError);
+          setShirtModels(defaultShirtModels);
+          return;
+        }
+
+        if (existingShirts && existingShirts.length > 0) {
+          // Convert database format to component format
+          const convertedShirts: ShirtModel[] = existingShirts.map(shirt => ({
+            id: shirt.id,
+            name: shirt.name,
+            type: shirt.type,
+            colors: shirt.colors || ['#ffffff', '#000000'],
+            price: shirt.price,
+            image: shirt.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+          }));
+          setShirtModels(convertedShirts);
+        } else {
+          // No shirts in database, insert defaults
+          const { error: insertError } = await supabase
+            .from('shirt_designs')
+            .insert(defaultShirtModels.map(shirt => ({
+              id: shirt.id,
+              name: shirt.name,
+              type: shirt.type,
+              colors: shirt.colors,
+              price: shirt.price,
+              image_url: shirt.image
+            })));
+
+          if (insertError) {
+            console.error('Error inserting default shirts:', insertError);
+          }
+          setShirtModels(defaultShirtModels);
+        }
+      } catch (error) {
+        console.error('Error loading shirts:', error);
+        setShirtModels(defaultShirtModels);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadShirts();
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,20 +164,112 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleAddShirt = () => {
+  const handleAddShirt = async () => {
     if (newShirt.name && newShirt.type && newShirt.price > 0) {
-      const newShirtModel: ShirtModel = {
-        id: (shirtModels.length + 1).toString(),
-        name: newShirt.name,
-        type: newShirt.type,
-        colors: newShirt.colors,
-        price: newShirt.price,
-        image: newShirt.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+      try {
+        // Save to Supabase
+        const { data, error } = await supabase
+          .from('shirt_designs')
+          .insert({
+            name: newShirt.name,
+            type: newShirt.type,
+            colors: newShirt.colors,
+            price: newShirt.price,
+            image_url: newShirt.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error saving shirt:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save shirt design. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Convert database format to component format
+        const newShirtModel: ShirtModel = {
+          id: data.id,
+          name: data.name,
+          type: data.type,
+          colors: data.colors || ['#ffffff', '#000000'],
+          price: data.price,
+          image: data.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+        };
+        
+        setShirtModels([...shirtModels, newShirtModel]);
+        setNewShirt({ name: '', type: '', colors: ['#ffffff', '#000000'], price: 0, image: '' });
+        setIsDialogOpen(false);
+        
+        toast({
+          title: "Success",
+          description: "Shirt design added to gallery!",
+        });
+      } catch (error) {
+        console.error('Error adding shirt:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add shirt design. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleAdd3DShirt = async () => {
+    try {
+      // Create a 3D shirt entry with default values
+      const { data, error } = await supabase
+        .from('shirt_designs')
+        .insert({
+          name: 'Custom 3D Shirt',
+          type: '3D Model',
+          colors: ['#ffffff', '#000000', '#3b82f6'],
+          price: 2999,
+          image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving 3D shirt:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create 3D shirt. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const new3DShirt: ShirtModel = {
+        id: data.id,
+        name: data.name,
+        type: data.type,
+        colors: data.colors || ['#ffffff', '#000000'],
+        price: data.price,
+        image: data.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
       };
       
-      setShirtModels([...shirtModels, newShirtModel]);
-      setNewShirt({ name: '', type: '', colors: ['#ffffff', '#000000'], price: 0, image: '' });
-      setIsDialogOpen(false);
+      setShirtModels([...shirtModels, new3DShirt]);
+      setIs3DDialogOpen(false);
+      
+      // Automatically select the new 3D shirt for customization
+      onShirtSelect(new3DShirt);
+      
+      toast({
+        title: "Success",
+        description: "3D shirt created and ready for customization!",
+      });
+    } catch (error) {
+      console.error('Error adding 3D shirt:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create 3D shirt. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -296,6 +448,59 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Add 3D Shirt Option at Bottom */}
+      <div className="flex justify-center mt-8">
+        <Dialog open={is3DDialogOpen} onOpenChange={setIs3DDialogOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              size="lg" 
+              className="gap-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-8 py-4 text-lg"
+            >
+              <Box className="w-6 h-6" />
+              Create 3D Shirt
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create 3D Shirt Model</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="text-center space-y-4">
+                <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
+                  <Box className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Ready to Create Your 3D Shirt?</h3>
+                  <p className="text-gray-600 mt-2">
+                    This will create a customizable 3D shirt model that you can view and modify in our 3D editor.
+                  </p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900">Features included:</h4>
+                  <ul className="text-sm text-blue-700 mt-2 space-y-1">
+                    <li>• 360° rotation view</li>
+                    <li>• Real-time design preview</li>
+                    <li>• Multiple color options</li>
+                    <li>• Custom texture mapping</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIs3DDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAdd3DShirt}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              >
+                Create 3D Shirt
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {!userDesign && (
