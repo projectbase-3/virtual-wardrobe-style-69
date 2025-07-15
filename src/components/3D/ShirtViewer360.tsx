@@ -19,6 +19,7 @@ interface ShirtViewer360Props {
   backPlacement?: DesignPlacement;
   showBack?: boolean;
   autoRotate?: boolean;
+  selectedShirt?: any;
 }
 
 const LoadingFallback = () => (
@@ -37,7 +38,8 @@ export const ShirtViewer360: React.FC<ShirtViewer360Props> = ({
   frontPlacement,
   backPlacement,
   showBack = false,
-  autoRotate = false
+  autoRotate = false,
+  selectedShirt
 }) => {
   return (
     <div className="w-full h-96 bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg overflow-hidden">
@@ -63,6 +65,8 @@ export const ShirtViewer360: React.FC<ShirtViewer360Props> = ({
             backPlacement={backPlacement}
             showBack={showBack}
             autoRotate={autoRotate}
+            is3DModel={selectedShirt?.is_3d_model}
+            modelUrl={selectedShirt?.model_url}
           />
         </Suspense>
         

@@ -22,6 +22,7 @@ interface ShirtViewer3DPanelProps {
   autoRotate: boolean;
   onToggleView: () => void;
   onToggleAutoRotate: () => void;
+  selectedShirt?: any;
 }
 
 export const ShirtViewer3DPanel: React.FC<ShirtViewer3DPanelProps> = ({
@@ -33,7 +34,8 @@ export const ShirtViewer3DPanel: React.FC<ShirtViewer3DPanelProps> = ({
   showBack,
   autoRotate,
   onToggleView,
-  onToggleAutoRotate
+  onToggleAutoRotate,
+  selectedShirt
 }) => {
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
@@ -72,6 +74,7 @@ export const ShirtViewer3DPanel: React.FC<ShirtViewer3DPanelProps> = ({
           backPlacement={backPlacement}
           showBack={showBack}
           autoRotate={autoRotate}
+          selectedShirt={selectedShirt}
         />
       </CardContent>
     </Card>

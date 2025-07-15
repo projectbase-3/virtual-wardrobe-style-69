@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { toast } from '@/hooks/use-toast';
 
 interface ShirtModel {
@@ -17,6 +18,9 @@ interface ShirtModel {
   colors: string[];
   price: number;
   image: string;
+  model_url?: string;
+  model_type?: string;
+  is_3d_model?: boolean;
 }
 
 interface ShirtCollection3DProps {
@@ -88,9 +92,12 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
     type: '',
     colors: ['#ffffff', '#000000'],
     price: 0,
-    image: ''
+    image: '',
+    modelFile: null as File | null,
+    modelUrl: ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modelFileInputRef = useRef<HTMLInputElement>(null);
 
   // Load shirts from Supabase on component mount
   useEffect(() => {
@@ -116,7 +123,10 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
             type: shirt.type,
             colors: shirt.colors || ['#ffffff', '#000000'],
             price: shirt.price,
-            image: shirt.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+            image: shirt.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format',
+            model_url: shirt.model_url,
+            model_type: shirt.model_type,
+            is_3d_model: shirt.is_3d_model
           }));
           setShirtModels(convertedShirts);
         } else {
@@ -164,6 +174,62 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
     fileInputRef.current?.click();
   };
 
+  const open3DFileDialog = () => {
+    modelFileInputRef.current?.click();
+  };
+
+  const handle3DModelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && (file.name.endsWith('.glb') || file.name.endsWith('.gltf'))) {
+      try {
+        // Upload file to Supabase storage
+        const fileName = `${Date.now()}-${file.name}`;
+        const { data, error } = await supabase.storage
+          .from('3d-models')
+          .upload(fileName, file);
+
+        if (error) {
+          console.error('Error uploading 3D model:', error);
+          toast({
+            title: "Error",
+            description: "Failed to upload 3D model. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Get public URL for the uploaded file
+        const { data: urlData } = supabase.storage
+          .from('3d-models')
+          .getPublicUrl(fileName);
+
+        setNewShirt({ 
+          ...newShirt, 
+          modelFile: file,
+          modelUrl: urlData.publicUrl
+        });
+
+        toast({
+          title: "Success",
+          description: "3D model uploaded successfully!",
+        });
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        toast({
+          title: "Error",
+          description: "Failed to upload 3D model. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please upload a .glb or .gltf file.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAddShirt = async () => {
     if (newShirt.name && newShirt.type && newShirt.price > 0) {
       try {
@@ -175,7 +241,10 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
             type: newShirt.type,
             colors: newShirt.colors,
             price: newShirt.price,
-            image_url: newShirt.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+            image_url: newShirt.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format',
+            model_url: newShirt.modelUrl || null,
+            model_type: newShirt.modelUrl ? '3d' : '2d',
+            is_3d_model: !!newShirt.modelUrl
           })
           .select()
           .single();
@@ -197,11 +266,14 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
           type: data.type,
           colors: data.colors || ['#ffffff', '#000000'],
           price: data.price,
-          image: data.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+          image: data.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format',
+          model_url: data.model_url,
+          model_type: data.model_type,
+          is_3d_model: data.is_3d_model
         };
         
         setShirtModels([...shirtModels, newShirtModel]);
-        setNewShirt({ name: '', type: '', colors: ['#ffffff', '#000000'], price: 0, image: '' });
+        setNewShirt({ name: '', type: '', colors: ['#ffffff', '#000000'], price: 0, image: '', modelFile: null, modelUrl: '' });
         setIsDialogOpen(false);
         
         toast({
@@ -250,7 +322,10 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
         type: data.type,
         colors: data.colors || ['#ffffff', '#000000'],
         price: data.price,
-        image: data.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format'
+        image: data.image_url || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&auto=format',
+        model_url: data.model_url,
+        model_type: data.model_type,
+        is_3d_model: data.is_3d_model
       };
       
       setShirtModels([...shirtModels, new3DShirt]);
@@ -373,6 +448,52 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
                   />
                 </div>
               </div>
+              
+              {/* 3D Model Upload Section */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="model" className="text-right">
+                  3D Model
+                </Label>
+                <div className="col-span-3 space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={open3DFileDialog}
+                    className="w-full gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload 3D Model (.glb/.gltf)
+                  </Button>
+                  {newShirt.modelFile && (
+                    <div className="relative p-2 bg-gray-50 rounded border">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm text-gray-600">
+                          {newShirt.modelFile.name}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setNewShirt({ ...newShirt, modelFile: null })}
+                          className="h-6 w-6 p-0 ml-auto"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    ref={modelFileInputRef}
+                    type="file"
+                    accept=".glb,.gltf"
+                    onChange={handle3DModelUpload}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Upload .glb or .gltf files for 3D shirt models
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -392,10 +513,22 @@ export const ShirtCollection3D: React.FC<ShirtCollection3DProps> = ({
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">{shirt.name}</CardTitle>
-                  <Badge variant="outline" className="mt-1">
-                    {shirt.type}
-                  </Badge>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {shirt.name}
+                    {shirt.is_3d_model && (
+                      <Box className="w-4 h-4 text-purple-600" />
+                    )}
+                  </CardTitle>
+                  <div className="flex gap-2 mt-1">
+                    <Badge variant="outline">
+                      {shirt.type}
+                    </Badge>
+                    {shirt.is_3d_model && (
+                      <Badge className="bg-purple-100 text-purple-700 border-purple-300">
+                        3D Model
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <Button variant="ghost" size="sm">
                   <Heart className="w-4 h-4" />

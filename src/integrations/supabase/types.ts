@@ -20,6 +20,9 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          is_3d_model: boolean | null
+          model_type: string | null
+          model_url: string | null
           name: string
           price: number
           type: string
@@ -31,6 +34,9 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_3d_model?: boolean | null
+          model_type?: string | null
+          model_url?: string | null
           name: string
           price?: number
           type: string
@@ -42,6 +48,9 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          is_3d_model?: boolean | null
+          model_type?: string | null
+          model_url?: string | null
           name?: string
           price?: number
           type?: string

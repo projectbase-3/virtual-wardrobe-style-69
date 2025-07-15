@@ -6,6 +6,7 @@ import { useTextureLoader } from '@/hooks/useTextureLoader';
 import { TShirtGeometry } from './TShirtGeometry';
 import { DesignRenderer } from './DesignRenderer';
 import { DebugIndicators } from './DebugIndicators';
+import { Custom3DModel } from './Custom3DModel';
 
 interface DesignPlacement {
   x: number;
@@ -23,6 +24,8 @@ interface ShirtModel3DProps {
   showBack?: boolean;
   rotationSpeed?: number;
   autoRotate?: boolean;
+  is3DModel?: boolean;
+  modelUrl?: string;
 }
 
 export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
@@ -33,7 +36,9 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
   backPlacement = { x: 0, y: 0.2, scale: 1.2, rotation: 0 },
   showBack = false,
   rotationSpeed = 0.01,
-  autoRotate = false
+  autoRotate = false,
+  is3DModel = false,
+  modelUrl
 }) => {
   const shirtRef = useRef<Group>(null);
   const { frontTexture, backTexture, frontTextureType, backTextureType, textureLoadingState } = useTextureLoader(frontDesign, backDesign);
@@ -65,17 +70,23 @@ export const ShirtModel3D: React.FC<ShirtModel3DProps> = ({
 
   return (
     <group ref={shirtRef} position={[0, 0, 0]}>
-      {/* Main T-shirt body */}
-      <TShirtGeometry color={color} />
+      {/* Main T-shirt body - use custom 3D model if available, otherwise default geometry */}
+      {is3DModel && modelUrl ? (
+        <Custom3DModel modelUrl={modelUrl} color={color} />
+      ) : (
+        <TShirtGeometry color={color} />
+      )}
       
-      {/* Design rendering */}
-      <DesignRenderer
-        frontTexture={frontTexture}
-        backTexture={backTexture}
-        frontPlacement={frontPlacement}
-        backPlacement={backPlacement}
-        showBack={showBack}
-      />
+      {/* Design rendering - only for default geometry for now */}
+      {!is3DModel && (
+        <DesignRenderer
+          frontTexture={frontTexture}
+          backTexture={backTexture}
+          frontPlacement={frontPlacement}
+          backPlacement={backPlacement}
+          showBack={showBack}
+        />
+      )}
       
       {/* Debug indicators */}
       <DebugIndicators

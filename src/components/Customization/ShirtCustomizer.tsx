@@ -176,6 +176,7 @@ export const ShirtCustomizer: React.FC<ShirtCustomizerProps> = ({
             autoRotate={autoRotate}
             onToggleView={handleToggleView}
             onToggleAutoRotate={handleToggleAutoRotate}
+            selectedShirt={selectedShirt}
           />
         </div>
 
